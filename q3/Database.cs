@@ -10,83 +10,24 @@ namespace q3
     public sealed class Database : IDisposable
     {
         private readonly MySqlConnection _connection;
-        private readonly MySqlTransaction _transaction;
-        private static string _address;
-        private static uint _port;
-        private static string _username;
-        private static string _password;
-        public static bool Configured;
-
-        public Database()
+        private readonly MySqlTransaction _transaction;        
+        
+        public Database(string ConnectionString)
         {
-            //get connection
-            MySqlConnectionStringBuilder connString = new MySqlConnectionStringBuilder
-            {
-                Server = _address,
-                Port = _port,
-                UserID = _username,
-                Password = _password
-            };
-            _connection = new MySqlConnection(connString.ConnectionString);
+            _connection = new MySqlConnection(ConnectionString);
 
             //create new transaction
             OpenConnection(_connection);
             _transaction = _connection.BeginTransaction();
         }
 
-        public Database(DatabaseNames database)
+        public Database(string database, string ConnectionString)
         {
-            //get connection
-            MySqlConnectionStringBuilder connString = new MySqlConnectionStringBuilder
-            {
-                Server = _address,
-                Database = database.Name(),
-                Port = _port,
-                UserID = _username,
-                Password = _password
-            };
-            _connection = new MySqlConnection(connString.ConnectionString);
+            _connection = new MySqlConnection(ConnectionString);
             //create new transaction
             OpenConnection(_connection);
             _transaction = _connection.BeginTransaction();
         }
-
-        /// <summary>
-        /// Sets the Database connection values
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="port"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        internal static bool SetDatabaseConnection(string address, uint port, string username, string password)
-        {
-            MySqlConnectionStringBuilder connString = new MySqlConnectionStringBuilder
-            {
-                Server = address,
-                Port = port,
-                UserID = username,
-                Password = password
-            };
-            using (MySqlConnection conn = new MySqlConnection(connString.ConnectionString))
-            {
-                try
-                {
-                    OpenConnection(conn);
-                }
-                catch (MySqlException)
-                {
-                    return false;
-                }
-                _address = address;
-                _port = port;
-                _username = username;
-                _password = password;
-            }
-            Configured = true;
-            return true;
-        }
-
 
         /// <summary>
         /// Executes a query inside a MySqlTransaction object and returns the value in position [0,0]
@@ -118,7 +59,7 @@ namespace q3
         /// <param name="query">The Query you wish to execute</param>
         /// <param name="parameters">The MySqlParameter you wish to attach to the query</param>
         /// <returns>A DataTable containing the results view</returns>
-        internal DataTable GetDataTable(string query, MySqlParameter[] parameters)
+        internal DataTable GetDataTable(string query, MySqlParameter[] parameters = null)
         {
             DataTable dt = new DataTable();
             MySqlConnection conn = CheckConnectionValid();
@@ -246,7 +187,8 @@ namespace q3
                 Transaction = _transaction,
                 Connection = conn
             };
-            cmd.Parameters.AddRange(parameters);
+            if(parameters != null && parameters.Length > 0)
+                cmd.Parameters.AddRange(parameters);
             return cmd;
         }
 

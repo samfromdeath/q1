@@ -11,6 +11,7 @@ namespace q3
         private const string sessionKey = "asp_session";
 
         public long UserId = 0L;
+        public string ConnectionString;
 
         private ASPSession()
         {

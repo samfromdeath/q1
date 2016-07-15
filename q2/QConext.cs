@@ -46,14 +46,17 @@ namespace q2
                 {
                     if(responce.Cookies.Count > 0)
                         Session = responce.Cookies;
+
+                    responce.Close();
+
                     return true;
                 }
-
+                responce.Close();
                 return false;
             }
         }
 
-        public async Task<string> SelectRequest(HttpWebRequest Request)
+        public async Task<byte[]> SelectRequest(HttpWebRequest Request)
         {
             using (HttpWebResponse responce = (HttpWebResponse)await Request.GetResponseAsync())
             {
@@ -61,14 +64,18 @@ namespace q2
                 {
                     if (responce.Cookies.Count > 0)
                         Session = responce.Cookies;
-
-                    using (StreamReader readStream = new StreamReader(responce.GetResponseStream(), Encoding.UTF8))
+                    var stream = responce.GetResponseStream();
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        return await readStream.ReadToEndAsync();
+                        await stream.CopyToAsync(ms);
+
+                        responce.Close();
+
+                        return ms.ToArray();
                     }
                 }
-
-                return string.Empty;
+                responce.Close();
+                return Helper.EmptyByteArray;
             }    
         }
 

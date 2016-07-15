@@ -34,7 +34,7 @@ namespace q2
             return (T)new object();
         }
 
-        public async Task<string> ExecuteReader()
+        public async Task<byte[]> ExecuteReader()
         {
             HttpWebRequest request = Context.CreateExecuteReader(Command);
             return await Context.SelectRequest(request);            

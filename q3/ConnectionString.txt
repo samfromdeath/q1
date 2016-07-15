@@ -1,0 +1,1 @@
+Server=neo.net.au;Port=1967;Uid=root;Pwd='1m0nfuego';Compress=true;ConvertZeroDateTime=true;
