@@ -14,7 +14,7 @@ namespace qTest
         static async void MainAsync(string[] args)
         {
             QConext.Configure();
-            var context = new QConext() { Address = "http://localhost:61388" };
+            var context = new QConext() { Address = "http://localhost/q3" };
             if (await context.Login("samuel123", "test"))
             {
                 while(true)
@@ -39,10 +39,10 @@ namespace qTest
 
                         Console.WriteLine("Size: " + result);
                         Console.WriteLine("Elapsed ms: " + sw.ElapsedMilliseconds);
-                        Console.WriteLine("Would you like to print data? (y, n)");
-                        string input = Console.ReadLine().ToLower();
-                        if (input == "y")
-                            Console.WriteLine(Encoding.UTF8.GetString(data));
+                        //Console.WriteLine("Would you like to print data? (y, n)");
+                        //string input = Console.ReadLine().ToLower();
+                        //if (input == "y")
+                        //    Console.WriteLine(Encoding.UTF8.GetString(data));
                     }
                     catch (Exception)
                     {

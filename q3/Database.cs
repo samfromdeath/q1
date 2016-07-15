@@ -53,6 +53,72 @@ namespace q3
             }
         }
 
+        public DataTable GetDataTableFromDataReader(IDataReader dataReader)
+        {
+            
+            DataTable schemaTable = dataReader.GetSchemaTable();
+            int ColumnLength = schemaTable.Rows.Count;
+
+            DataTable resultTable = new DataTable();
+            for (int i = 0; i < ColumnLength; i++)
+            {
+                DataRow dr = schemaTable.Rows[i];
+
+                resultTable.Columns.Add(new DataColumn()
+                {
+                    ColumnName = Convert.ToString(dr["ColumnName"]),
+                    DataType = (Type)dr["DataType"],
+                    ReadOnly = (bool)dr["IsReadOnly"],
+                    AutoIncrement = (bool)dr["IsAutoIncrement"],
+                    Unique = (bool)dr["IsUnique"]
+                });
+            }
+                        
+            while (dataReader.Read())
+            {
+                DataRow dataRow = resultTable.NewRow();
+                for (int i = 0; i < ColumnLength; i++)
+                {
+                    dataRow[i] = dataReader[i];
+                }
+                resultTable.Rows.Add(dataRow);
+            }
+
+            return resultTable;
+        }
+
+        /// <summary>
+        /// Executes a query inside a MySqlTransaction object and returns a datatable of the results
+        /// </summary>
+        /// <param name="query">The Query you wish to execute</param>
+        /// <param name="parameters">The MySqlParameter you wish to attach to the query</param>
+        /// <returns>A DataTable containing the results view</returns>
+        internal DataTable GetDataTableCustom(string query, MySqlParameter[] parameters = null)
+        {
+            DataTable dt = new DataTable();
+            MySqlConnection conn = CheckConnectionValid();
+            using (MySqlCommand cmd = CreateCommand(conn, query, parameters))
+            {
+                try
+                {
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        DataSet ds = new DataSet();
+                        ds.Tables.Add(dt);
+                        ds.EnforceConstraints = false;
+                        
+                        dt = GetDataTableFromDataReader(dr);
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    TransactionRollback();
+                    throw new MySqlCommandError("Encountered an error executing this query", ex);
+                }
+            }
+            return dt;
+        }
+
         /// <summary>
         /// Executes a query inside a MySqlTransaction object and returns a datatable of the results
         /// </summary>
@@ -68,10 +134,11 @@ namespace q3
                 try
                 {
                     using (MySqlDataReader dr = cmd.ExecuteReader())
-                    {
+                    {                        
                         DataSet ds = new DataSet();
                         ds.Tables.Add(dt);
                         ds.EnforceConstraints = false;
+                        
                         dt.Load(dr);
                     }
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -23,7 +24,7 @@ namespace q3
                 {
                     if (context.Request.Headers["UserId"] == "samuel123" && context.Request.Headers["PassId"] == "test")
                     {
-                        ASPSession.Current.ConnectionString = File.ReadAllText(@"C:\Users\samuel grahame\Dropbox\q1\q3\ConnectionString.txt");
+                        ASPSession.Current.ConnectionString = File.ReadAllText(@"C:\Programming\q1\q3\ConnectionString.txt");
                         ASPSession.Current.UserId = 1;
                     }
                     else
@@ -50,6 +51,15 @@ namespace q3
                             using (Database db = new Database("main", ASPSession.Current.ConnectionString))
                             {
                                 var dt = db.GetDataTable(context.Request.Headers["Request"]);
+
+
+
+
+
+
+
+
+
                                 if (dt != null && dt.Columns.Count > 0)
                                 {
                                     using (BinaryWriter bw = new BinaryWriter(context.Response.OutputStream))
